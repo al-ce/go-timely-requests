@@ -1,2 +1,2 @@
-PUT	http://localhost:8080/topics/rotate	6	16	20
-GET	http://localhost:3001/ping	6	16	25
+PUT	http://localhost:8080/topics/rotate	6	30	10
+GET	http://localhost:3001/ping	6	30	18
