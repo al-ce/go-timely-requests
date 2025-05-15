@@ -1,4 +1,4 @@
-// jobrunner runs http requests daily at midnight
+// Runs daily http requests at scheduled times
 
 // References:
 // https://www.calhoun.io/using-select-in-go/
