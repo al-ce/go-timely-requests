@@ -17,15 +17,14 @@ import (
 
 const GRACE_PERIOD = 10
 
-
-// Job represents an http request with the given method and url to be run daily
-// at the given hour and second
+// Job represents an http request to be run at the scheduled time
 type Job struct {
 	method string
 	url    string
 	hour   int
 	minute int
 	second int
+	data   string
 }
 
 func main() {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -26,8 +27,8 @@ func readJobs(path string) ([]Job, error) {
 		line := scanner.Text()
 		fields := strings.Split(line, "\t")
 
-		// Only accept exactly 5 fields
-		if len(fields) != 5 {
+		// Needs minimum 5 fields
+		if len(fields) < 5 {
 			return jobs, errors.New(fmt.Sprintf("insufficient fields: %s", line))
 		}
 		method, url := fields[0], fields[1]
@@ -43,9 +44,21 @@ func readJobs(path string) ([]Job, error) {
 		if err != nil {
 			return jobs, err
 		}
+
+		data := ""
+
+		// Validate the optional 6th field as JSON data
+		if len(fields) > 5 {
+			_, err := json.Marshal(fields[5])
+			if err != nil {
+				log.Fatalf("%s", fmt.Sprintf("%s : %s", line, err.Error()))
+			}
+			data = fields[5]
+		}
 		jobs = append(jobs, Job{
-			method, url, hour, minute, second,
+			method, url, hour, minute, second, data,
 		})
+
 	}
 	return jobs, nil
 }

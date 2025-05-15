@@ -1,2 +1,3 @@
 PUT	http://localhost:8080/topics/rotate	6	30	10
 GET	http://localhost:3001/ping	6	30	18
+POST	https://httpbin.org/post	7	36	0	{"name":"bob","age":"55"}
