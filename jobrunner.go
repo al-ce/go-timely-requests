@@ -31,8 +31,14 @@ type Job struct {
 func main() {
 	log.SetPrefix("[JOB] ")
 
+	// Get file path from args
+	if len(os.Args) != 2 {
+		log.Fatalf("Usage: jobrunner [FILE]")
+	}
+	path := os.Args[1]
+
 	// Read list of jobs to schedule
-	jobs, err := readJobs("jobs.tsv")
+	jobs, err := readJobs(path)
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
