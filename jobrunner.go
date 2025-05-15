@@ -51,7 +51,7 @@ func main() {
 		wg.Add(1)
 		go func(job Job) {
 			defer wg.Done()
-			scheduleDailyJob(ctx, job.method, job.url, resultChan)
+			scheduleDailyJob(ctx, job, resultChan)
 		}(j)
 		log.Printf("scheduled: %v", j)
 	}

@@ -9,15 +9,15 @@ import (
 )
 
 // scheduleDailyJob schedules a job to run once a day at midnight
-func scheduleDailyJob(ctx context.Context, method, url string, ch chan<- string) {
+func scheduleDailyJob(ctx context.Context, job Job, ch chan<- string) {
 	client := &http.Client{
 		Timeout: 5 * time.Second,
 	}
 
 	for {
 		// Calculate time until next midnight
-		waitTime := getTimeUntilNextMidnight()
-		log.Printf("%s %s: next job scheduled in %v", method, url, waitTime)
+		waitTime := getDurationToNextJobRun(job)
+		log.Printf("%s %s: next job scheduled in %v", job.method, job.url, waitTime)
 
 		// Timer will send to its channel on the next midnight
 		timer := time.NewTimer(waitTime)
@@ -25,10 +25,10 @@ func scheduleDailyJob(ctx context.Context, method, url string, ch chan<- string)
 		select {
 		case <-ctx.Done(): // Listen for context cancels after os.Interrupt signal
 			timer.Stop()
-			ch <- fmt.Sprintf("stopping request (%s %s)", method, url)
+			ch <- fmt.Sprintf("stopping request (%s %s)", job.method, job.url)
 			return
 		case <-timer.C: // Execute the job at midnight
-			req, err := http.NewRequest(method, url, nil)
+			req, err := http.NewRequest(job.method, job.url, nil)
 			if err != nil {
 				ch <- fmt.Sprintf("Error creating request: %v", err)
 				continue
@@ -43,7 +43,7 @@ func scheduleDailyJob(ctx context.Context, method, url string, ch chan<- string)
 				continue
 			}
 
-			ch <- fmt.Sprintf("%s %s %s", method, url, resp.Status)
+			ch <- fmt.Sprintf("%s %s %s", job.method, job.url, resp.Status)
 			resp.Body.Close()
 
 			// Check if context was canceled during request execution
@@ -54,10 +54,19 @@ func scheduleDailyJob(ctx context.Context, method, url string, ch chan<- string)
 	}
 }
 
-// getTimeUntilNextMidnight calculates the time until the next midnight
-func getTimeUntilNextMidnight() time.Duration {
+// getDurationToNextJobRun calculates the duration until the next scheduled job run
+func getDurationToNextJobRun(job Job) time.Duration {
 	now := time.Now().UTC()
-	nextMidnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	nextMidnight := time.Date(
+		now.Year(),
+		now.Month(),
+		now.Day(),
+		job.hour,
+		job.minute,
+		job.second,
+		0,
+		time.UTC,
+	)
 	if now.After(nextMidnight) {
 		// If we've already passed midnight today, schedule for tomorrow
 		nextMidnight = nextMidnight.Add(24 * time.Hour)
