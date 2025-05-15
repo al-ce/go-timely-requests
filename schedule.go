@@ -12,18 +12,18 @@ import (
 	"time"
 )
 
-// scheduleDailyJob schedules a job to run once a day at midnight
+// scheduleDailyJob schedules a job to run once a day
 func scheduleDailyJob(ctx context.Context, job Job, ch chan<- string) {
 	client := &http.Client{
 		Timeout: 5 * time.Second,
 	}
 
 	for {
-		// Calculate time until next midnight
+		// Calculate time until next job run
 		waitTime := getDurationToNextJobRun(job)
 		log.Printf("%s %s: next job scheduled in %v", job.method, job.url, waitTime)
 
-		// Timer will send to its channel on the next midnight
+		// Timer will send to its channel at the next scheduled time
 		timer := time.NewTimer(waitTime)
 
 		select {
@@ -92,7 +92,7 @@ func scheduleDailyJob(ctx context.Context, job Job, ch chan<- string) {
 // getDurationToNextJobRun calculates the duration until the next scheduled job run
 func getDurationToNextJobRun(job Job) time.Duration {
 	now := time.Now().UTC()
-	nextMidnight := time.Date(
+	nextJobRun := time.Date(
 		now.Year(),
 		now.Month(),
 		now.Day(),
@@ -102,9 +102,9 @@ func getDurationToNextJobRun(job Job) time.Duration {
 		0,
 		time.UTC,
 	)
-	if now.After(nextMidnight) {
-		// If we've already passed midnight today, schedule for tomorrow
-		nextMidnight = nextMidnight.Add(24 * time.Hour)
+	if now.After(nextJobRun) {
+		// If we've already passed the schedlued time today, schedule for tomorrow
+		nextJobRun = nextJobRun.Add(24 * time.Hour)
 	}
-	return nextMidnight.Sub(now)
+	return nextJobRun.Sub(now)
 }
