@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -29,7 +28,7 @@ func readJobs(path string) ([]Job, error) {
 
 		// Needs minimum 5 fields
 		if len(fields) < 5 {
-			return jobs, errors.New(fmt.Sprintf("insufficient fields: %s", line))
+			return jobs, fmt.Errorf("insufficient fields: %s", line)
 		}
 		method, url := fields[0], fields[1]
 		hour, err := strconv.Atoi(fields[2])
