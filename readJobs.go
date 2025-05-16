@@ -22,6 +22,8 @@ func readJobs(path string) ([]Job, error) {
 	}
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
+
+	var id int
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line == "" {
@@ -57,8 +59,10 @@ func readJobs(path string) ([]Job, error) {
 			}
 			data = fields[5]
 		}
+
+		id += 1
 		jobs = append(jobs, Job{
-			method, url, hour, minute, second, data,
+			id, method, url, hour, minute, second, data,
 		})
 
 	}

@@ -19,6 +19,7 @@ const GRACE_PERIOD = 10
 
 // Job represents an http request to be run at the scheduled time
 type Job struct {
+	id     int
 	method string
 	url    string
 	hour   int
