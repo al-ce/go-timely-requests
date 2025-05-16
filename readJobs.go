@@ -24,6 +24,9 @@ func readJobs(path string) ([]Job, error) {
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		line := scanner.Text()
+		if line == "" {
+			continue
+		}
 		fields := strings.Split(line, "\t")
 
 		// Needs minimum 5 fields

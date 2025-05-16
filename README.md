@@ -8,20 +8,19 @@ Each row in the tsv should be in the format:
 {method}\t{url}\t{hour}\t{minute}\t{second}\t{JSON}
 ```
 
-Separated by actual tab characters.
+separated by actual tab characters.
 
-The first five fields are mandatory. The sixth field must be a valid JSON on a single line, with no tabs in it.
-
+The first five fields are mandatory. The optional sixth field must be a valid JSON on a single line, with no tabs in it.
+Empty lines are allowed.
 
 ## Example
 
 ```tsv
 PUT	http://localhost:8080/topics/rotate	6	30	10
 GET	http://localhost:3001/ping	6	30	18
+
 POST	https://httpbin.org/post	7	18	5	{"name":"bob","age":"55"}
 ```
-
-
 
 ```bash
 ❯ go run . jobs.tsv
@@ -45,4 +44,3 @@ POST	https://httpbin.org/post	7	18	5	{"name":"bob","age":"55"}
 [JOB] 2025/05/15 01:30:21 stopping jobrunner...
 [JOB] 2025/05/15 01:30:21 graceful shutdown
 ```
-
