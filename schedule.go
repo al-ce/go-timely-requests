@@ -1,14 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -32,54 +28,7 @@ func scheduleDailyJob(ctx context.Context, job Job, ch chan<- string) {
 			ch <- fmt.Sprintf("stopping request (%s %s)", job.method, job.url)
 			return
 		case <-timer.C: // Make the request at the scheduled time
-			req, err := http.NewRequest(job.method, job.url, strings.NewReader(job.data))
-			if err != nil {
-				ch <- fmt.Sprintf("Error creating request: %v", err)
-				continue
-			}
-			req.Header.Set("Content-Type", "application/json")
-
-			// Use context for the request so it can be canceled
-			req = req.WithContext(ctx)
-
-			// Make the request
-			resp, err := client.Do(req)
-			if err != nil {
-				ch <- fmt.Sprintf("Error executing request: %v", err)
-				continue
-			}
-
-			// Read response
-			respBody, err := io.ReadAll(resp.Body)
-			if err != nil {
-				log.Printf("Error reading response body: %v", err)
-				continue
-			}
-			defer resp.Body.Close()
-
-			// Format data to JSON
-			var respData bytes.Buffer
-			err = json.Indent(&respData, respBody, "", " ")
-			if err != nil {
-				log.Println(
-					fmt.Sprintf(
-						"Error formatting JSON: %s %s %s %v",
-						job.method,
-						job.url,
-						job.data,
-						err,
-					),
-				)
-			}
-
-			// Send response to channel for logging
-			ch <- fmt.Sprintf(
-				"%s %s %s %v",
-				job.method,
-				job.url,
-				resp.Status,
-				respData.String(),
-			)
+			ch <- makeRequest(client, ctx, job)
 
 			// Check if context was canceled during request execution
 			if ctx.Err() != nil {
